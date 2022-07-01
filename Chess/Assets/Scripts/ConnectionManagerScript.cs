@@ -10,6 +10,7 @@ public class ConnectionManagerScript : NetworkBehaviour
     public NetworkList<int> gridNumbersCode;
     List<int> localLastGridNumbersCode = new List<int>();
     GameObject gameManager;
+    bool playingWhite;
 
     void Awake()
     {
@@ -56,6 +57,8 @@ public class ConnectionManagerScript : NetworkBehaviour
     [ClientRpc]
     void LoadGameSceneClientRpc()
     {
+        playingWhite = false;
+        if(NetworkManager.Singleton.IsHost) playingWhite = true;
         SceneManager.LoadScene("GameScene");
     }
 
@@ -92,7 +95,6 @@ public class ConnectionManagerScript : NetworkBehaviour
             SetGridNumbersCodeList(gridCodeArray);
         }else
         {
-            print("pelatakos");
             UpdateGridNumbersCodeServerRpc(gridCodeArray);
         }
     }
@@ -102,5 +104,8 @@ public class ConnectionManagerScript : NetworkBehaviour
     {   
         SetGridNumbersCodeList(gridCodeArray);
     }
-
+    public bool GetPlayingWhite()
+    {
+        return playingWhite;
+    }
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +8,7 @@ public class GameManagerBehavior : MonoBehaviour
     bool holdingPiece = false;
     int heldPieceParentSiblingIndex = -1;
     GameObject board;
+    bool playingWhite;
     [SerializeField] GameObject tile;
     [SerializeField] int columns;
     [SerializeField] int rows;
@@ -22,6 +23,7 @@ public class GameManagerBehavior : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        playingWhite = GameObject.FindGameObjectWithTag("ConnectionManager").GetComponent<ConnectionManagerScript>().GetPlayingWhite();
         board = transform.parent.GetChild(1).gameObject;
         overlay = transform.parent.GetChild(transform.parent.childCount-1).gameObject;
         availableTiles = new List<int>();
@@ -312,9 +314,18 @@ public class GameManagerBehavior : MonoBehaviour
             if(!CheckIfGridPositionOccupied(newGridPosition,team))
                 kingAvailableGridPositions.Add(newGridPosition); 
         }
+      
         //Roke
         if(board.transform.GetChild(GetSiblingIndexByGridPosition(kingGridPosition)).GetChild(1).GetComponent<GamePiece>().GetTimesMoved()!=0)
+        {
+            if(kingAvailableGridPositions.Count>0)
+                for(int i=kingAvailableGridPositions.Count-1; i>=0; i--)
+                {
+                    if(CheckIfSquareNextToEnemyKing(kingAvailableGridPositions[i],team))
+                    kingAvailableGridPositions.RemoveAt(i);
+                }
             return kingAvailableGridPositions;
+        }
 
         if(kingGridPosition.y==rows-1 || kingGridPosition.y == 0)
         {
@@ -340,9 +351,107 @@ public class GameManagerBehavior : MonoBehaviour
             }
         }
 
+        if(kingAvailableGridPositions.Count>0)
+            for(int i=kingAvailableGridPositions.Count-1; i>=0; i--)
+            {
+                if(CheckIfSquareNextToEnemyKing(kingAvailableGridPositions[i],team))
+                kingAvailableGridPositions.RemoveAt(i);
+            }
+            
         return kingAvailableGridPositions;
 
     }
+
+
+    bool CheckIfSquareNextToEnemyKing(Vector2 gridPosition, int team){
+        Vector2 newGridPosition;
+        GamePiece gp;
+        if(gridPosition.x != 0)
+        {   
+            if(gridPosition.y != 0)
+            {
+                newGridPosition = new Vector2(gridPosition.x-1,gridPosition.y-1);
+                if(CheckIfGridPositionOccupied(newGridPosition))
+                {
+                    gp = board.transform.GetChild(GetSiblingIndexByGridPosition(newGridPosition)).GetChild(1).GetComponent<GamePiece>();
+                    if(gp.GetPieceType()==GamePiece.PieceType.King && gp.GetPieceTeam()!=team)
+                        return true;
+                }
+            }
+            if(gridPosition.y != rows-1)
+            {
+                newGridPosition = new Vector2(gridPosition.x-1,gridPosition.y+1);
+                if(CheckIfGridPositionOccupied(newGridPosition))
+                {
+                    gp = board.transform.GetChild(GetSiblingIndexByGridPosition(newGridPosition)).GetChild(1).GetComponent<GamePiece>();
+                    if(gp.GetPieceType()==GamePiece.PieceType.King && gp.GetPieceTeam()!=team)
+                        return true;
+                }
+            }
+            newGridPosition = new Vector2(gridPosition.x-1,gridPosition.y);
+            if(CheckIfGridPositionOccupied(newGridPosition))
+            {
+                gp = board.transform.GetChild(GetSiblingIndexByGridPosition(newGridPosition)).GetChild(1).GetComponent<GamePiece>();
+                if(gp.GetPieceType()==GamePiece.PieceType.King && gp.GetPieceTeam()!=team)
+                    return true;
+            }       
+        }
+        
+        if(gridPosition.x != columns-1)
+        {
+            if(gridPosition.y != 0)
+            {
+                newGridPosition = new Vector2(gridPosition.x+1,gridPosition.y-1);
+                if(CheckIfGridPositionOccupied(newGridPosition))
+                {
+                    gp = board.transform.GetChild(GetSiblingIndexByGridPosition(newGridPosition)).GetChild(1).GetComponent<GamePiece>();
+                    if(gp.GetPieceType()==GamePiece.PieceType.King && gp.GetPieceTeam()!=team)
+                        return true;
+                }
+            }
+            if(gridPosition.y != rows-1)
+            {
+                newGridPosition = new Vector2(gridPosition.x+1,gridPosition.y+1);
+                if(CheckIfGridPositionOccupied(newGridPosition))
+                {
+                    gp = board.transform.GetChild(GetSiblingIndexByGridPosition(newGridPosition)).GetChild(1).GetComponent<GamePiece>();
+                    if(gp.GetPieceType()==GamePiece.PieceType.King && gp.GetPieceTeam()!=team)
+                        return true;
+                }
+            }
+            newGridPosition = new Vector2(gridPosition.x+1,gridPosition.y);
+            if(CheckIfGridPositionOccupied(newGridPosition))
+            {
+                gp = board.transform.GetChild(GetSiblingIndexByGridPosition(newGridPosition)).GetChild(1).GetComponent<GamePiece>();
+                if(gp.GetPieceType()==GamePiece.PieceType.King && gp.GetPieceTeam()!=team)
+                    return true;
+            }
+        }
+
+        if(gridPosition.y != 0)
+        {
+            newGridPosition = new Vector2(gridPosition.x,gridPosition.y-1);
+            if(CheckIfGridPositionOccupied(newGridPosition))
+            {
+                gp = board.transform.GetChild(GetSiblingIndexByGridPosition(newGridPosition)).GetChild(1).GetComponent<GamePiece>();
+                if(gp.GetPieceType()==GamePiece.PieceType.King && gp.GetPieceTeam()!=team)
+                    return true;
+            }
+        }
+        if(gridPosition.y != rows-1)
+        {
+            newGridPosition = new Vector2(gridPosition.x,gridPosition.y+1);
+            if(CheckIfGridPositionOccupied(newGridPosition))
+            {
+                gp = board.transform.GetChild(GetSiblingIndexByGridPosition(newGridPosition)).GetChild(1).GetComponent<GamePiece>();
+                if(gp.GetPieceType()==GamePiece.PieceType.King && gp.GetPieceTeam()!=team)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     List<Vector2> GetKnightAvailableMovementTiles(Vector2 knightGridPosition, int team)
     {   
         Vector2 temp = knightGridPosition;
@@ -507,10 +616,13 @@ public class GameManagerBehavior : MonoBehaviour
         return tempList;
     }
 
-    void SpawnPieceByNumberCode(int boardPositionIndex, int pieceNumberCode, bool whiteTeam)
+    void SpawnPieceByNumberCode(int boardPositionIndex, int pieceNumberCode, int timesMoved, int timesEaten, int profit, bool whiteTeam)
     {
         GameObject piece = Instantiate(allPieces[pieceNumberCode-1],new Vector3(0,0,0),Quaternion.identity,board.transform.GetChild(boardPositionIndex));
         piece.GetComponent<GamePiece>().SetPieceTeam(whiteTeam?0:1,whiteTeam?whitePieceColor:blackPieceColor);
+        piece.GetComponent<GamePiece>().SetTimesMoved(timesMoved);
+        piece.GetComponent<GamePiece>().SetTimesEaten(timesEaten);
+        piece.GetComponent<GamePiece>().SetProfit(profit);
         piece.transform.localPosition = new Vector3(0,0,0);
     }
     void DespawnPieceByGridIndex(int index)
@@ -522,19 +634,20 @@ public class GameManagerBehavior : MonoBehaviour
     {
         for(int i=0; i<gridNumbersCodeList.Count; i++)
         {
-            if(gridNumbersCodeList[i]/1000%100!=0)
+            if(gridNumbersCodeList[i]/1000000%100!=0)//piece exists on tile
             {
                 if(board.transform.GetChild(i).childCount==1)
                 {
-                    SpawnPieceByNumberCode(i, Mathf.Abs(gridNumbersCodeList[i]/1000)%100,gridNumbersCodeList[i]>0);
-
+                    int absGridNumberCode = Mathf.Abs(gridNumbersCodeList[i]);
+                    SpawnPieceByNumberCode(i, (absGridNumberCode/1000000)%100, absGridNumberCode%100, (absGridNumberCode/100)%100, (absGridNumberCode/10000)%100, gridNumbersCodeList[i]>0);  
                 }else if(board.transform.GetChild(i).childCount==2)
                 {
                     if(board.transform.GetChild(i).childCount==2)
                     {
                         DespawnPieceByGridIndex(i);
                     }
-                    SpawnPieceByNumberCode(i, Mathf.Abs(gridNumbersCodeList[i]/1000)%100,gridNumbersCodeList[i]>0);  
+                    int absGridNumberCode = Mathf.Abs(gridNumbersCodeList[i]);
+                    SpawnPieceByNumberCode(i, (absGridNumberCode/1000000)%100, absGridNumberCode%100, (absGridNumberCode/100)%100, (absGridNumberCode/10000)%100, gridNumbersCodeList[i]>0);  
                 }  
             }else
             {
@@ -553,6 +666,10 @@ public class GameManagerBehavior : MonoBehaviour
 
     void SetupBoard()
     {
+        if(!playingWhite)
+        {
+            board.GetComponent<GridLayoutGroup>().startCorner = GridLayoutGroup.Corner.UpperRight;
+        }
         GenerateBoard();
         SetupPieces();        
     }

@@ -27,6 +27,7 @@ public class TileBehavior : MonoBehaviour
     {
         if(transform.childCount > 1)
         {
+            if(connectorScript.GetPlayingWhite()!=(transform.GetChild(1).GetComponent<GamePiece>().GetPieceTeam()==0)) return;
             gameManagerBehavior.SetHeldPiece(transform.GetSiblingIndex());
             transform.GetChild(1).SetParent(overlay.transform);
         }
@@ -77,7 +78,7 @@ public class TileBehavior : MonoBehaviour
         connectorScript.UpdateGridNumbersCode(GetGridToNumbersList().ToArray());
     }
 
-    List<int> GetGridToNumbersList()
+    List<int> GetGridToNumbersList()//two digits for: tile, then type, then profit, then timeseaten, then timesmoved -> 10 digits
     {
         List<int> gridToNumbersList = new List<int>();
         int temp = 0;
@@ -95,27 +96,32 @@ public class TileBehavior : MonoBehaviour
                 gridToNumbersList.Add(temp);
             }else
             {
-                switch(transform.parent.GetChild(i).GetChild(1).GetComponent<GamePiece>().GetPieceType()) 
+                GamePiece tempPiece = transform.parent.GetChild(i).GetChild(1).GetComponent<GamePiece>();
+                switch(tempPiece.GetPieceType()) 
                 {
                     case GamePiece.PieceType.Knight:
-                        temp += 2000;
+                        temp += 2000000;
                         break;
                     case GamePiece.PieceType.Bishop:
-                        temp += 3000;
+                        temp += 3000000;
                         break;
                     case GamePiece.PieceType.Rook:
-                        temp += 4000;
+                        temp += 4000000;
                         break;
                     case GamePiece.PieceType.Queen:
-                        temp += 5000;
+                        temp += 5000000;
                         break;
                     case GamePiece.PieceType.King:
-                        temp += 6000;
+                        temp += 6000000;
                         break;
                     default:
-                        temp += 1000;
+                        temp += 1000000;
                         break;
                 }
+
+                temp += tempPiece.GetTimesMoved();
+                temp += tempPiece.GetTimesEaten()*100;
+                temp += tempPiece.GetProfit()*10000;
                 
                 if(transform.parent.GetChild(i).GetChild(1).GetComponent<GamePiece>().GetPieceTeam()!=0)
                 {

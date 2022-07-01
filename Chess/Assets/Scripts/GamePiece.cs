@@ -54,6 +54,18 @@ public class GamePiece : MonoBehaviour
     {
         return profit;
     }
+    public void SetTimesMoved(int t)
+    {
+        timesMoved = t;
+    }
+    public void SetTimesEaten(int t)
+    {
+        timesAte = t;
+    }
+    public void SetProfit(int p)
+    {
+        profit = p;
+    }
     public int GetPieceValue()
     {
         return pieceValue;
